@@ -1,0 +1,16 @@
+{
+  "name": "algorithm",
+  "version": "1.0.0",
+  "description": "Mỗi thuật toán: ý tưởng 1 câu + câu tự kiểm tra (đáp án giấu trong mục \"Đáp án\") + bài LeetCode luyện thêm. Thứ tự từ dễ đến khó. Cài đặt bằng JavaScript, chạy bằng Node 24, debug trong VS Code (F5 + breakpoint).",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@napi-rs/canvas": "^1.0.10",
+    "gifenc": "^1.0.3"
+  }
+}
