@@ -36,7 +36,7 @@ LeetCode: 283 (Move Zeroes).
 
 LeetCode: 912 (Sort an Array — tự cài để luyện).
 
-### 3. Insertion Sort
+### 3. Insertion Sort — [chi tiết](sorting/insertion-sort.md)
 - [ ] **Ý tưởng:** Lấy từng phần tử, dịch các phần tử lớn hơn trong phần đã sắp sang phải rồi chèn nó vào đúng chỗ (như xếp bài trên tay).
 - [ ] Độ phức tạp best / avg / worst? Best case xảy ra khi nào?
 - [ ] Stable không? In-place không?
