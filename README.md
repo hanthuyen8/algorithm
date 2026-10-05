@@ -21,7 +21,7 @@ Cài đặt bằng JavaScript, chạy bằng Node 24, debug trong VS Code (F5 + 
 
 LeetCode: 283 (Move Zeroes).
 
-### 2. Selection Sort
+### 2. Selection Sort — [chi tiết](sorting/selection-sort.md)
 - [ ] **Ý tưởng:** Mỗi lượt tìm phần tử nhỏ nhất trong phần chưa sắp rồi đổi nó về đầu phần đó.
 - [ ] Độ phức tạp best / avg / worst?
 - [ ] Stable không? In-place không?

@@ -10,18 +10,19 @@ assert.deepStrictEqual(sort([3, 1, 3, 2, 1]), [1, 1, 2, 3, 3]);
 function sort(array) {
     let n = array.length;
 
-    for (let i = n - 1; i > 0; i--) {
-        let swapped = false;
-        for (let j = 0; j < i; j++) {
-            if (array[j] > array[j + 1]) {
-                let tmp = array[j + 1];
-                array[j + 1] = array[j];
-                array[j] = tmp;
-                swapped = true;
+    for (let i = 0; i < n - 1; i++) {
+        let minIndex = i;
+
+        for (let j = i + 1; j < n; j++) {
+            if (array[j] < array[minIndex]) {
+                minIndex = j;
             }
         }
-        if (!swapped) {
-            break;
+
+        if (minIndex !== i) {
+            let tmp = array[minIndex];
+            array[minIndex] = array[i];
+            array[i] = tmp;
         }
     }
 

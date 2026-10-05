@@ -67,9 +67,9 @@ const BOX = 64;
 const GAP = 12;
 const MARGIN = 40;
 const WIDTH = MARGIN * 2 + data.length * BOX + (data.length - 1) * GAP;
-const HEIGHT = 240;
+const HEIGHT = 300;
 const BOX_Y = 120;
-const ARC = 60;
+const ARC = 75; // enough for a moving box to clear the boxes it passes
 
 const canvas = createCanvas(WIDTH, HEIGHT);
 const ctx = canvas.getContext('2d');
@@ -130,7 +130,7 @@ function drawSwap(values, a, b, t) {
     const xa = boxX(a) + (boxX(b) - boxX(a)) * t;
     const xb = boxX(b) + (boxX(a) - boxX(b)) * t;
     drawBox(values[a], xa, BOX_Y - lift, true);
-    drawBox(values[b], xb, BOX_Y + lift * 0.5, true);
+    drawBox(values[b], xb, BOX_Y + lift, true);
 }
 
 // --- Encode ---
