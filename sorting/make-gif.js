@@ -134,13 +134,22 @@ const NO_SPLITS = new Set();
 const boxX = (i) => xOf(i, NO_SPLITS);
 const lerp = (from, to, t) => from + (to - from) * t;
 
-function drawBox(value, x, y, highlight, dim = false) {
-    ctx.fillStyle = highlight ? '#fff4e0' : '#ffffff';
-    ctx.strokeStyle = highlight ? '#f59e0b' : dim ? '#d1d5db' : '#374151';
+const BOX_STYLES = {
+    normal: { fill: '#ffffff', stroke: '#374151', text: '#111827' },
+    highlight: { fill: '#fff4e0', stroke: '#f59e0b', text: '#111827' },
+    dim: { fill: '#ffffff', stroke: '#d1d5db', text: '#9ca3af' },
+    pivot: { fill: '#e0ecff', stroke: '#3b82f6', text: '#111827' },
+    done: { fill: '#e8f8ee', stroke: '#22c55e', text: '#111827' },
+};
+
+function drawBox(value, x, y, style = 'normal') {
+    const s = BOX_STYLES[style];
+    ctx.fillStyle = s.fill;
+    ctx.strokeStyle = s.stroke;
     ctx.lineWidth = 3;
     ctx.fillRect(x, y, BOX, BOX);
     ctx.strokeRect(x, y, BOX, BOX);
-    ctx.fillStyle = dim ? '#9ca3af' : '#111827';
+    ctx.fillStyle = s.text;
     ctx.font = 'bold 28px sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
@@ -155,8 +164,8 @@ function drawGap(x, y) {
     ctx.setLineDash([]);
 }
 
-// Arrow pointing at a box: from above (down) or from below (up).
-function drawArrow(boxLeft, boxTop, fromBelow = false) {
+// Arrow pointing at a box: from above (down) or from below (up), with an optional label at its tail.
+function drawArrow(boxLeft, boxTop, fromBelow = false, label = null) {
     const x = boxLeft + BOX / 2;
     const dir = fromBelow ? -1 : 1;
     const tip = fromBelow ? boxTop + BOX + 10 : boxTop - 10;
@@ -174,6 +183,29 @@ function drawArrow(boxLeft, boxTop, fromBelow = false) {
     ctx.lineTo(x, tip);
     ctx.closePath();
     ctx.fill();
+    if (label) drawLabel(label, x, tail - dir * 12, '#f59e0b');
+}
+
+function drawLabel(text, x, y, color) {
+    ctx.fillStyle = color;
+    ctx.font = 'bold 20px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(text, x, y);
+}
+
+// A small triangle under a box marking a position (Quick Sort's i).
+function drawMarker(boxLeft, label) {
+    const x = boxLeft + BOX / 2;
+    const top = BOX_Y + BOX + 8;
+    ctx.fillStyle = '#7c3aed';
+    ctx.beginPath();
+    ctx.moveTo(x, top);
+    ctx.lineTo(x - 12, top + 18);
+    ctx.lineTo(x + 12, top + 18);
+    ctx.closePath();
+    ctx.fill();
+    drawLabel(label, x, top + 34, '#7c3aed');
 }
 
 function clear() {
@@ -187,10 +219,10 @@ function drawScene(values, { arrows = [], gaps = [], skip = [], floating = [] } 
     clear();
     values.forEach((v, i) => {
         if (gaps.includes(i)) drawGap(boxX(i), BOX_Y);
-        else if (!skip.includes(i)) drawBox(v, boxX(i), BOX_Y, arrows.includes(i));
+        else if (!skip.includes(i)) drawBox(v, boxX(i), BOX_Y, arrows.includes(i) ? 'highlight' : 'normal');
     });
     arrows.forEach((i) => drawArrow(boxX(i), BOX_Y));
-    floating.forEach((f) => drawBox(f.value, f.x, f.y, true));
+    floating.forEach((f) => drawBox(f.value, f.x, f.y, 'highlight'));
 }
 
 // --- Encode ---
@@ -302,10 +334,10 @@ function renderMerge() {
         cells.forEach((row, d) => row.forEach((c, i) => {
             if (!c) return;
             if (c.style === 'gap') drawGap(treeX(i, d), treeY(d));
-            else drawBox(c.value, treeX(i, d), treeY(d), c.style === 'highlight', c.style === 'dim');
+            else drawBox(c.value, treeX(i, d), treeY(d), c.style);
         }));
         arrows.forEach(([i, d]) => drawArrow(treeX(i, d), treeY(d), true));
-        floating.forEach((f) => drawBox(f.value, f.x, f.y, true));
+        floating.forEach((f) => drawBox(f.value, f.x, f.y, 'highlight'));
     }
 
     function visit(lo, hi, d) {
@@ -365,8 +397,101 @@ function renderMerge() {
     addFrame(2000);
 }
 
+// Quick Sort picks a random pivot, so recording a real run would give a different GIF every time.
+// Replay the same Lomuto partition with a fixed random sequence instead.
+// Colors: blue = pivot, orange arrow j = the element being checked, purple marker i = where the
+// next smaller element goes, green = pivot already in its final place, faded = outside the current group.
+function renderQuick() {
+    let seed = 106680; // first pick is the last element, matching the example in quick-sort.md
+    const random = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+    const values = [...input];
+    const done = new Set();
+
+    function draw({ lo = 0, hi = N - 1, pivot = null, i = null, j = null, skip = [], floating = [] } = {}) {
+        clear();
+        values.forEach((v, k) => {
+            if (skip.includes(k)) return;
+            let style = 'normal';
+            if (done.has(k)) style = 'done';
+            else if (k < lo || k > hi) style = 'dim';
+            else if (k === pivot) style = 'pivot';
+            else if (k === j) style = 'highlight';
+            drawBox(v, boxX(k), BOX_Y, style);
+        });
+        if (j !== null) drawArrow(boxX(j), BOX_Y, false, 'j');
+        if (i !== null) drawMarker(boxX(i), 'i');
+        floating.forEach((f) => drawBox(f.value, f.x, f.y, f.style));
+    }
+
+    // Box a goes over the top to b, box b goes underneath to a.
+    function swapAnimated(a, b, state) {
+        if (a === b) return;
+        const styleOf = (k) => (k === state.pivot ? 'pivot' : 'highlight');
+        animate((t) => {
+            const lift = Math.sin(Math.PI * t) * ARC;
+            draw({
+                ...state,
+                skip: [a, b],
+                floating: [
+                    { value: values[a], x: lerp(boxX(a), boxX(b), t), y: BOX_Y - lift, style: styleOf(a) },
+                    { value: values[b], x: lerp(boxX(b), boxX(a), t), y: BOX_Y + lift, style: styleOf(b) },
+                ],
+            });
+        });
+        [values[a], values[b]] = [values[b], values[a]];
+    }
+
+    function quickSort(lo, hi) {
+        if (lo > hi) return;
+        if (lo === hi) {
+            done.add(lo);
+            draw();
+            addFrame(COMPARE_DELAY);
+            return;
+        }
+        draw({ lo, hi });
+        addFrame(COMPARE_DELAY);
+
+        // Random pivot, moved to the end of the group.
+        const r = lo + Math.floor(random() * (hi - lo + 1));
+        draw({ lo, hi, pivot: r });
+        addFrame(COMPARE_DELAY);
+        swapAnimated(r, hi, { lo, hi, pivot: r });
+
+        // Lomuto: j checks each element; a smaller one swaps to the marker i, then i moves on.
+        let i = lo;
+        for (let j = lo; j < hi; j++) {
+            draw({ lo, hi, pivot: hi, i, j });
+            addFrame(COMPARE_DELAY);
+            if (values[j] < values[hi]) {
+                swapAnimated(i, j, { lo, hi, pivot: hi });
+                i++;
+            }
+        }
+
+        // The pivot swaps to the marker — its final place.
+        draw({ lo, hi, pivot: hi, i });
+        addFrame(COMPARE_DELAY);
+        swapAnimated(i, hi, { lo, hi, pivot: hi });
+        done.add(i);
+        draw({ lo, hi });
+        addFrame(COMPARE_DELAY);
+
+        quickSort(lo, i - 1);
+        quickSort(i + 1, hi);
+    }
+
+    draw();
+    addFrame(1200);
+    quickSort(0, N - 1);
+    draw();
+    addFrame(2000);
+}
+
 if (IS_MERGE) {
     renderMerge();
+} else if (name === 'quick-sort') {
+    renderQuick();
 } else {
     drawScene(input);
     addFrame(1200);

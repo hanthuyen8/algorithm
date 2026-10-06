@@ -68,7 +68,7 @@ LeetCode: 147 (Insertion Sort List).
 
 LeetCode: 88 (Merge Sorted Array), 21 (Merge Two Sorted Lists).
 
-### 5. Quick Sort
+### 5. Quick Sort — [chi tiết](sorting/quick-sort.md)
 - [ ] **Ý tưởng:** Chọn một pivot, phân hoạch để bên trái ≤ pivot và bên phải > pivot, rồi đệ quy hai bên.
 - [ ] Độ phức tạp best / avg / worst? Worst xảy ra khi nào, tránh thế nào?
 - [ ] Stable không? In-place không?
