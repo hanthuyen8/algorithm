@@ -6,6 +6,8 @@ Cài đặt bằng JavaScript, chạy bằng Node 24, debug trong VS Code (F5 + 
 
 ## Sorting
 
+Vì sao O(n²) và O(n log n) khác nhau, log là gì: [đọc trước](sorting/complexity.md).
+
 ### 1. Bubble Sort — [chi tiết](sorting/bubble-sort.md)
 - [ ] **Ý tưởng:** Duyệt mảng nhiều lượt, đổi chỗ hai phần tử kề nhau nếu sai thứ tự; sau mỗi lượt phần tử lớn nhất "nổi" về cuối.
 - [ ] Độ phức tạp best / avg / worst?
@@ -51,7 +53,7 @@ LeetCode: 912 (Sort an Array — tự cài để luyện).
 
 LeetCode: 147 (Insertion Sort List).
 
-### 4. Merge Sort
+### 4. Merge Sort — [chi tiết](sorting/merge-sort.md)
 - [ ] **Ý tưởng:** Chia đôi mảng, sắp từng nửa đệ quy, rồi trộn hai nửa đã sắp thành một.
 - [ ] Độ phức tạp best / avg / worst?
 - [ ] Stable không? In-place không? Tốn bao nhiêu bộ nhớ phụ?
